@@ -5,13 +5,15 @@ import { createTableDataApi, deleteTableDataApi, getTableDataApi, updateTableDat
 import { usePagination } from "@@/composables/usePagination"
 import { CirclePlus, Delete, Download, Refresh, RefreshRight, Search } from "@element-plus/icons-vue"
 import { cloneDeep } from "lodash-es"
+import { useOperationLogStore } from "@/pinia/stores/operation-log"
 
 defineOptions({
-  // 命名当前组件
   name: "ElementPlus"
 })
 
 const loading = ref<boolean>(false)
+
+const operationLogStore = useOperationLogStore()
 
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -40,9 +42,19 @@ function handleCreateOrUpdate() {
       return
     }
     loading.value = true
-    const api = formData.value.id === undefined ? createTableDataApi : updateTableDataApi
+    const isCreate = formData.value.id === undefined
+    const api = isCreate ? createTableDataApi : updateTableDataApi
     api(formData.value).then(() => {
       ElMessage.success("操作成功")
+      operationLogStore.recordLog({
+        module: "表格管理",
+        action: isCreate ? "create" : "update",
+        description: isCreate ? `新增用户：${formData.value.username}` : `修改用户：${formData.value.username}`,
+        details: {
+          username: formData.value.username,
+          ...(formData.value.id && { id: formData.value.id })
+        }
+      })
       dialogVisible.value = false
       getTableData()
     }).finally(() => {
@@ -66,6 +78,15 @@ function handleDelete(row: TableData) {
   }).then(() => {
     deleteTableDataApi(row.id).then(() => {
       ElMessage.success("删除成功")
+      operationLogStore.recordLog({
+        module: "表格管理",
+        action: "delete",
+        description: `删除用户：${row.username}`,
+        details: {
+          id: row.id,
+          username: row.username
+        }
+      })
       getTableData()
     })
   })
@@ -99,6 +120,19 @@ function getTableData() {
   }).then(({ data }) => {
     paginationData.total = data.total
     tableData.value = data.list
+    if (searchData.username || searchData.phone) {
+      operationLogStore.recordLog({
+        module: "表格管理",
+        action: "view",
+        description: "查询用户列表",
+        details: {
+          username: searchData.username || undefined,
+          phone: searchData.phone || undefined,
+          page: paginationData.currentPage,
+          size: paginationData.pageSize
+        }
+      })
+    }
   }).catch(() => {
     tableData.value = []
   }).finally(() => {

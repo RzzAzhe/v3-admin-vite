@@ -60,6 +60,15 @@ export const constantRoutes: RouteRecordRaw[] = [
           svgIcon: "dashboard",
           affix: true
         }
+      },
+      {
+        path: "profile",
+        component: () => import("@/pages/profile/index.vue"),
+        name: "Profile",
+        meta: {
+          title: "个人中心",
+          elIcon: "UserFilled"
+        }
       }
     ]
   },
@@ -78,7 +87,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/pages/demo/unocss/index.vue"),
         name: "UnoCSS",
         meta: {
-          title: "UnoCSS"
+          title: "原子化样式"
         }
       },
       {
@@ -86,7 +95,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/pages/demo/element-plus/index.vue"),
         name: "ElementPlus",
         meta: {
-          title: "Element Plus",
+          title: "表格管理",
           keepAlive: true
         }
       },
@@ -95,7 +104,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/pages/demo/vxe-table/index.vue"),
         name: "VxeTable",
         meta: {
-          title: "Vxe Table",
+          title: "高级表格",
           keepAlive: true
         }
       },
@@ -133,7 +142,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/pages/demo/composable-demo/use-fetch-select.vue"),
             name: "UseFetchSelect",
             meta: {
-              title: "useFetchSelect"
+              title: "下拉选择器"
             }
           },
           {
@@ -141,7 +150,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/pages/demo/composable-demo/use-fullscreen-loading.vue"),
             name: "UseFullscreenLoading",
             meta: {
-              title: "useFullscreenLoading"
+              title: "全屏加载"
             }
           },
           {
@@ -149,7 +158,7 @@ export const constantRoutes: RouteRecordRaw[] = [
             component: () => import("@/pages/demo/composable-demo/use-watermark.vue"),
             name: "UseWatermark",
             meta: {
-              title: "useWatermark"
+              title: "水印功能"
             }
           }
         ]
@@ -189,6 +198,29 @@ export const constantRoutes: RouteRecordRaw[] = [
  * @description 必须带有唯一的 Name 属性
  */
 export const dynamicRoutes: RouteRecordRaw[] = [
+  {
+    path: "/system",
+    component: Layouts,
+    redirect: "/system/operation-log",
+    name: "System",
+    meta: {
+      title: "系统管理",
+      elIcon: "Setting",
+      roles: ["admin"],
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "operation-log",
+        component: () => import("@/pages/operation-log/index.vue"),
+        name: "OperationLog",
+        meta: {
+          title: "操作日志",
+          roles: ["admin"]
+        }
+      }
+    ]
+  },
   {
     path: "/permission",
     component: Layouts,
