@@ -1,5 +1,6 @@
 // 统一处理 localStorage
 
+import type { OperationLog } from "@@/composables/useOperationLog"
 import type { ThemeName } from "@@/composables/useTheme"
 import type { SidebarClosed, SidebarOpened } from "@@/constants/app-key"
 import type { LayoutsConfig } from "@/layouts/config"
@@ -77,5 +78,29 @@ export function getCachedViews() {
 
 export function setCachedViews(views: string[]) {
   localStorage.setItem(CacheKey.CACHED_VIEWS, JSON.stringify(views))
+}
+// #endregion
+
+// #region 操作日志
+export function getOperationLogs() {
+  const json = localStorage.getItem(CacheKey.OPERATION_LOGS)
+  return JSON.parse(json ?? "[]") as OperationLog[]
+}
+
+export function setOperationLogs(logs: OperationLog[]) {
+  localStorage.setItem(CacheKey.OPERATION_LOGS, JSON.stringify(logs))
+}
+
+export function addOperationLog(log: OperationLog) {
+  const logs = getOperationLogs()
+  logs.unshift(log)
+  if (logs.length > 500) {
+    logs.splice(500)
+  }
+  setOperationLogs(logs)
+}
+
+export function clearOperationLogs() {
+  localStorage.removeItem(CacheKey.OPERATION_LOGS)
 }
 // #endregion
