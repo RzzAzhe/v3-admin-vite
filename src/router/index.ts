@@ -199,13 +199,131 @@ export const constantRoutes: RouteRecordRaw[] = [
  */
 export const dynamicRoutes: RouteRecordRaw[] = [
   {
+    path: "/student",
+    component: Layouts,
+    redirect: "/student/course-selection",
+    name: "Student",
+    meta: {
+      title: "学生端",
+      elIcon: "User",
+      roles: ["student"],
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "course-selection",
+        component: () => import("@/pages/student/course-selection/index.vue"),
+        name: "StudentCourseSelection",
+        meta: {
+          title: "选课退课",
+          elIcon: "List",
+          roles: ["student"]
+        }
+      },
+      {
+        path: "schedule-view",
+        component: () => import("@/pages/student/schedule-view/index.vue"),
+        name: "StudentScheduleView",
+        meta: {
+          title: "查看课表",
+          elIcon: "Calendar",
+          roles: ["student"]
+        }
+      },
+      {
+        path: "grade-view",
+        component: () => import("@/pages/student/grade-view/index.vue"),
+        name: "StudentGradeView",
+        meta: {
+          title: "查看成绩",
+          elIcon: "DocumentChecked",
+          roles: ["student"]
+        }
+      },
+      {
+        path: "teacher-rating",
+        component: () => import("@/pages/student/teacher-rating/index.vue"),
+        name: "StudentTeacherRating",
+        meta: {
+          title: "教师评价",
+          elIcon: "Star",
+          roles: ["student"]
+        }
+      }
+    ]
+  },
+  {
+    path: "/admin",
+    component: Layouts,
+    redirect: "/admin/course-management",
+    name: "Admin",
+    meta: {
+      title: "管理员端",
+      elIcon: "Setting",
+      roles: ["admin"],
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "course-management",
+        component: () => import("@/pages/admin/course-management/index.vue"),
+        name: "AdminCourseManagement",
+        meta: {
+          title: "课程管理",
+          elIcon: "Menu",
+          roles: ["admin"]
+        }
+      },
+      {
+        path: "course-selection-view",
+        component: () => import("@/pages/admin/course-selection-view/index.vue"),
+        name: "AdminCourseSelectionView",
+        meta: {
+          title: "选课情况",
+          elIcon: "View",
+          roles: ["admin"]
+        }
+      },
+      {
+        path: "schedule-management",
+        component: () => import("@/pages/admin/schedule-management/index.vue"),
+        name: "AdminScheduleManagement",
+        meta: {
+          title: "排课管理",
+          elIcon: "Calendar",
+          roles: ["admin"]
+        }
+      },
+      {
+        path: "grade-management",
+        component: () => import("@/pages/admin/grade-management/index.vue"),
+        name: "AdminGradeManagement",
+        meta: {
+          title: "成绩录入",
+          elIcon: "EditPen",
+          roles: ["admin"]
+        }
+      },
+      {
+        path: "exam-management",
+        component: () => import("@/pages/admin/exam-management/index.vue"),
+        name: "AdminExamManagement",
+        meta: {
+          title: "考试安排",
+          elIcon: "Clock",
+          roles: ["admin"]
+        }
+      }
+    ]
+  },
+  {
     path: "/system",
     component: Layouts,
     redirect: "/system/operation-log",
     name: "System",
     meta: {
       title: "系统管理",
-      elIcon: "Setting",
+      elIcon: "Tools",
       roles: ["admin"],
       alwaysShow: true
     },
@@ -217,41 +335,6 @@ export const dynamicRoutes: RouteRecordRaw[] = [
         meta: {
           title: "操作日志",
           roles: ["admin"]
-        }
-      }
-    ]
-  },
-  {
-    path: "/permission",
-    component: Layouts,
-    redirect: "/permission/page-level",
-    name: "Permission",
-    meta: {
-      title: "权限演示",
-      elIcon: "Lock",
-      // 可以在根路由中设置角色
-      roles: ["admin", "editor"],
-      alwaysShow: true
-    },
-    children: [
-      {
-        path: "page-level",
-        component: () => import("@/pages/demo/permission/page-level.vue"),
-        name: "PermissionPageLevel",
-        meta: {
-          title: "页面级",
-          // 或者在子路由中设置角色
-          roles: ["admin"]
-        }
-      },
-      {
-        path: "button-level",
-        component: () => import("@/pages/demo/permission/button-level.vue"),
-        name: "PermissionButtonLevel",
-        meta: {
-          title: "按钮级",
-          // 如果未设置角色，则表示：该页面不需要权限，但会继承根路由的角色
-          roles: undefined
         }
       }
     ]

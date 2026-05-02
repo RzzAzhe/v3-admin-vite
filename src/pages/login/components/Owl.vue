@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 interface Props {
-  closeEyes: boolean
+  closeEyes?: boolean
 }
 
-const props = defineProps<Props>()
+const { closeEyes = false } = defineProps<Props>()
 </script>
 
 <template>
-  <div class="owl" :class="{ 'owl-password': props.closeEyes }">
+  <div class="owl" :class="{ 'owl-password': closeEyes }">
     <div class="hand-down-left" />
     <div class="hand-down-right" />
     <div class="hand-up-left" />
