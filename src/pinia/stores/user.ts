@@ -1,7 +1,6 @@
 import { setToken as _setToken, getToken, removeToken } from "@@/utils/local-storage"
 import { pinia } from "@/pinia"
 import { resetRouter } from "@/router"
-import { routerConfig } from "@/router/config"
 import { useSettingsStore } from "./settings"
 import { useTagsViewStore } from "./tags-view"
 
@@ -35,11 +34,13 @@ export const useUserStore = defineStore("user", () => {
   const token = ref<string>(getToken() || "")
 
   const storedInfo = getStoredUserInfo()
-  const roles = ref<string[]>(storedInfo?.roles || [])
+  const isValidStoredInfo = storedInfo && "userId" in storedInfo && "loginUsername" in storedInfo && "displayName" in storedInfo
 
-  const userId = ref<number>(storedInfo?.userId || 0)
-  const loginUsername = ref<string>(storedInfo?.loginUsername || "")
-  const username = ref<string>(storedInfo?.displayName || "")
+  const roles = ref<string[]>(isValidStoredInfo ? (storedInfo as StoredUserInfo).roles : [])
+
+  const userId = ref<number>(isValidStoredInfo ? (storedInfo as StoredUserInfo).userId : 0)
+  const loginUsername = ref<string>(isValidStoredInfo ? (storedInfo as StoredUserInfo).loginUsername : "")
+  const username = ref<string>(isValidStoredInfo ? (storedInfo as StoredUserInfo).displayName : "")
 
   const tagsViewStore = useTagsViewStore()
 
@@ -65,13 +66,20 @@ export const useUserStore = defineStore("user", () => {
 
   const getInfo = async () => {
     const storedInfo = getStoredUserInfo()
-    if (storedInfo) {
+    if (storedInfo && "userId" in storedInfo && "loginUsername" in storedInfo && "displayName" in storedInfo) {
       userId.value = storedInfo.userId
       loginUsername.value = storedInfo.loginUsername
       username.value = storedInfo.displayName
       roles.value = storedInfo.roles
     } else {
-      roles.value = routerConfig.defaultRoles
+      removeStoredUserInfo()
+      removeToken()
+      token.value = ""
+      roles.value = []
+      userId.value = 0
+      loginUsername.value = ""
+      username.value = ""
+      throw new Error("用户信息已过期，请重新登录")
     }
   }
 
