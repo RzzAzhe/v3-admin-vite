@@ -29,8 +29,8 @@ export function registerNavigationGuard(router: Router) {
     }
     // 如果已经登录，并准备进入 Login 页面，则重定向到主页
     if (to.path === LOGIN_PATH) return "/"
-    // 如果用户已经获得其权限角色
-    if (userStore.roles.length !== 0) return true
+    // 如果用户已经获得其权限角色，并且动态路由已经初始化
+    if (userStore.roles.length !== 0 && permissionStore.addRoutes.length > 0) return true
     // 否则要重新获取权限角色
     try {
       await userStore.getInfo()
