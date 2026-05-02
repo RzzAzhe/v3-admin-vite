@@ -13,13 +13,10 @@ const eduStore = useEduStore()
 const currentWeek = ref(1)
 const maxWeek = 16
 
-const currentStudentId = computed(() => {
-  const user = eduStore.users.find(u => u.username === userStore.username)
-  return user?.id || 0
-})
+const currentStudentId = computed(() => userStore.userId)
 
 const currentStudent = computed(() => {
-  return eduStore.users.find(u => u.username === userStore.username)
+  return eduStore.users.find(u => u.id === userStore.userId)
 })
 
 const schedules = computed(() => {

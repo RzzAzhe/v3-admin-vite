@@ -57,7 +57,9 @@ function handleLogin() {
 
         userStore.setToken(`token-${user.roles}-${user.id}`)
         userStore.setUserInfo({
-          username: user.name,
+          userId: user.id,
+          loginUsername: user.username,
+          displayName: user.name,
           roles: [user.roles]
         })
 
