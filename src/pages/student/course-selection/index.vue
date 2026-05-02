@@ -15,10 +15,7 @@ const searchData = reactive({
   teacherName: ""
 })
 
-const currentStudentId = computed(() => {
-  const user = eduStore.users.find(u => u.username === userStore.username)
-  return user?.id || 0
-})
+const currentStudentId = computed(() => userStore.userId)
 
 const availableCourses = computed(() => {
   let courses = eduStore.courses.filter(c => c.status === "open")

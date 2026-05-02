@@ -14,13 +14,10 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const formRef = useTemplateRef("formRef")
 
-const currentStudentId = computed(() => {
-  const user = eduStore.users.find(u => u.username === userStore.username)
-  return user?.id || 0
-})
+const currentStudentId = computed(() => userStore.userId)
 
 const currentStudent = computed(() => {
-  return eduStore.users.find(u => u.username === userStore.username)
+  return eduStore.users.find(u => u.id === userStore.userId)
 })
 
 const myRatings = computed(() => {
