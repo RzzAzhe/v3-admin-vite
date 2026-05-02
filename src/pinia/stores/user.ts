@@ -1,13 +1,19 @@
 import { setToken as _setToken, getToken, removeToken } from "@@/utils/local-storage"
 import { pinia } from "@/pinia"
 import { resetRouter } from "@/router"
-import { routerConfig } from "@/router/config"
 import { useSettingsStore } from "./settings"
 import { useTagsViewStore } from "./tags-view"
 
 const USER_INFO_KEY = "edu_user_info"
 
-function getStoredUserInfo() {
+interface StoredUserInfo {
+  userId: number
+  loginUsername: string
+  displayName: string
+  roles: string[]
+}
+
+function getStoredUserInfo(): StoredUserInfo | null {
   try {
     const data = localStorage.getItem(USER_INFO_KEY)
     return data ? JSON.parse(data) : null
@@ -16,7 +22,7 @@ function getStoredUserInfo() {
   }
 }
 
-function setStoredUserInfo(info: { username: string, roles: string[] }) {
+function setStoredUserInfo(info: StoredUserInfo) {
   localStorage.setItem(USER_INFO_KEY, JSON.stringify(info))
 }
 
@@ -28,66 +34,80 @@ export const useUserStore = defineStore("user", () => {
   const token = ref<string>(getToken() || "")
 
   const storedInfo = getStoredUserInfo()
-  const roles = ref<string[]>(storedInfo?.roles || [])
+  const isValidStoredInfo = storedInfo && "userId" in storedInfo && "loginUsername" in storedInfo && "displayName" in storedInfo
 
-  const username = ref<string>(storedInfo?.username || "")
+  const roles = ref<string[]>(isValidStoredInfo ? (storedInfo as StoredUserInfo).roles : [])
+
+  const userId = ref<number>(isValidStoredInfo ? (storedInfo as StoredUserInfo).userId : 0)
+  const loginUsername = ref<string>(isValidStoredInfo ? (storedInfo as StoredUserInfo).loginUsername : "")
+  const username = ref<string>(isValidStoredInfo ? (storedInfo as StoredUserInfo).displayName : "")
 
   const tagsViewStore = useTagsViewStore()
 
   const settingsStore = useSettingsStore()
 
-  // 设置 Token
   const setToken = (value: string) => {
     _setToken(value)
     token.value = value
   }
 
-  // 设置用户信息（登录时调用）
-  const setUserInfo = (info: { username: string, roles: string[] }) => {
-    username.value = info.username
-    setStoredUserInfo(info)
+  const setUserInfo = (info: { userId: number, loginUsername: string, displayName: string, roles: string[] }) => {
+    userId.value = info.userId
+    loginUsername.value = info.loginUsername
+    username.value = info.displayName
+    roles.value = info.roles
+    setStoredUserInfo({
+      userId: info.userId,
+      loginUsername: info.loginUsername,
+      displayName: info.displayName,
+      roles: info.roles
+    })
   }
 
-  // 获取用户详情（从本地存储恢复）
   const getInfo = async () => {
     const storedInfo = getStoredUserInfo()
-    if (storedInfo) {
-      username.value = storedInfo.username
+    if (storedInfo && "userId" in storedInfo && "loginUsername" in storedInfo && "displayName" in storedInfo) {
+      userId.value = storedInfo.userId
+      loginUsername.value = storedInfo.loginUsername
+      username.value = storedInfo.displayName
       roles.value = storedInfo.roles
     } else {
-      // 如果没有存储的信息，使用默认角色
-      roles.value = routerConfig.defaultRoles
+      removeStoredUserInfo()
+      removeToken()
+      token.value = ""
+      roles.value = []
+      userId.value = 0
+      loginUsername.value = ""
+      username.value = ""
+      throw new Error("用户信息已过期，请重新登录")
     }
   }
 
-  // 模拟角色变化
   const changeRoles = (role: string) => {
     const newToken = `token-${role}`
     token.value = newToken
     _setToken(newToken)
-    // 用刷新页面代替重新登录
     location.reload()
   }
 
-  // 登出
   const logout = () => {
     removeToken()
     removeStoredUserInfo()
     token.value = ""
     roles.value = []
+    userId.value = 0
+    loginUsername.value = ""
     username.value = ""
     resetRouter()
     resetTagsView()
   }
 
-  // 重置 Token
   const resetToken = () => {
     removeToken()
     token.value = ""
     roles.value = []
   }
 
-  // 重置 Visited Views 和 Cached Views
   const resetTagsView = () => {
     if (!settingsStore.cacheTagsView) {
       tagsViewStore.delAllVisitedViews()
@@ -95,13 +115,21 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  return { token, roles, username, setToken, setUserInfo, getInfo, changeRoles, logout, resetToken }
+  return {
+    token,
+    roles,
+    userId,
+    loginUsername,
+    username,
+    setToken,
+    setUserInfo,
+    getInfo,
+    changeRoles,
+    logout,
+    resetToken
+  }
 })
 
-/**
- * @description 在 SPA 应用中可用于在 pinia 实例被激活前使用 store
- * @description 在 SSR 应用中可用于在 setup 外使用 store
- */
 export function useUserStoreOutside() {
   return useUserStore(pinia)
 }
